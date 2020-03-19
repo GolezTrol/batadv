@@ -1,0 +1,1 @@
+set curroom=libr1

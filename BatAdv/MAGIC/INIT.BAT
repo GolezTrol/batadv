@@ -1,0 +1,9 @@
+set north=
+set south=
+set east=Secret1
+set west=
+set up=
+set down=
+set in=
+set close=
+set look=

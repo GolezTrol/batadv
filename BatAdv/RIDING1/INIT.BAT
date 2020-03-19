@@ -1,0 +1,9 @@
+set north=City41
+set south=
+set east=Stables1
+set west=
+set up=
+set down=
+set in=
+set close=
+set look=

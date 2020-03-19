@@ -1,0 +1,9 @@
+set north=
+set south=City2
+set east=Gate3
+set west=
+set up=
+set down=
+set in=
+set close=
+set look=

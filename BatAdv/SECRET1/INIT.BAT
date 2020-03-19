@@ -1,0 +1,9 @@
+set north=
+set south=Base3
+set east=
+set west=
+set up=
+set down=
+set in=
+set close=Base3
+set look=

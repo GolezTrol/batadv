@@ -1,0 +1,9 @@
+set north=
+set south=
+set east=
+set west=Riding1
+set up=
+set down=
+set in=
+set close=
+set look=

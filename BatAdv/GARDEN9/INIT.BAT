@@ -1,0 +1,9 @@
+set north=Garden11
+set south=
+set east=Garden8
+set west=
+set up=
+set down=
+set in=
+set close=
+set look=

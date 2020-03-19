@@ -1,0 +1,9 @@
+set north=
+set south=City65
+set east=City16
+set west=
+set up=
+set down=
+set in=
+set close=
+set look=

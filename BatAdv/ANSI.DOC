@@ -1,0 +1,49 @@
+ANSI.COM
+Command
+
+Michael J. Mefford
+1989 No. 2 (Utilities)
+
+
+Purpose:	A memory-resident utility that enables selectable use of the
+extended screen and keyboard control sequences that normally require loading the
+ANSI.SYS device driver.  Unlike ANSI.SYS, ANSI.COM supports all video modes,
+permits sizing and clearing the key-assignment buffer, and provides high-speed
+screen updating.
+	
+Format:	ANSI [FAST | SLOW][ON | OFF][/B nnn][/C][/U]
+	
+Remarks:	ANSI.COM may be installed either at the DOS prompt or through an
+AUTOEXEC.BAT file.  It will not load itself if ANSI.SYS has already been loaded
+as part of a CONFIG.SYS file.  ANSI.COM will not load multiple copies of itself,
+so its command name may be invoked repeatedly in the same session to change
+user-selectable parameters.
+
+	Upon loading, ANSI defaults to the FAST and ON status parameters.  For
+use with IBM CGA video cards (where direct screen writes produce "snow") or with
+some screen capture software, the SLOW (screen writing via the BIOS, as with
+ANSI.SYS) status option may be selected.  Entering ANSI OFF disables recognition
+of the ANSI control codes. 
+
+	The ANSI.COM key assignment buffer defaults to a size of 200 bytes.  The
+buffer may be increased to as much as 60K or decreased to 0 bytes by entering
+ANSI with the /B switch and the desired number of bytes as nnn.  Resizing the
+buffer after initial installation requires deinstallation, which may be
+accomplished using the /U switch.  Current key assignments are lost if the
+buffer is resized.  The buffer can be cleared without resizing by invoking ANSI
+with the /C switch.
+
+	The full command set of IBM-ANSI control sequences is printed in the
+original article and in the DOS Technical Reference manual.  This information
+can also be downloaded from PC Magnet.
+
+	Available for downloading from PC MagNet (see the ANSI by Modem
+sidebar), ANSI.COM is already compiled and ready to run.  ANSI.BAS will
+automatically create ANSI.COM when run once in BASIC.  To create ANSI.COM from
+the ANSI.ASM source code requires use of a macro assembler (IBM or Microsoft,
+Version 2 or later) and the following commands:
+
+MASM ANSI;
+LINK ANSI;
+EXE2BIN ANSI ANSI.COM;
+

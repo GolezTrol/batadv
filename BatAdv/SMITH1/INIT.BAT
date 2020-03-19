@@ -1,0 +1,9 @@
+set north=
+set south=
+set east=City28
+set west=
+set up=
+set down=
+set in=
+set close=
+set look=

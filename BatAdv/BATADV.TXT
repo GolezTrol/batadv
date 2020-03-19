@@ -1,0 +1,306 @@
+---------------------------------------------------------
+-- Batch Adventure documentation                       --
+---------------------------------------------------------
+
+Main Index:
+
+1) About Batch Adventure
+1.1) General information
+1.2) System Requirements
+1.3) Copyright Notice
+2) Key Controls
+3) Setting up Batch Adventure
+4) Future Ideas
+5) Trooble Shooting
+
+Advanced information:
+
+6) How is Batch Adventure built up?
+7) How to make your own game?
+7.1) The start
+7.2) Hints 
+
+Other information:
+
+8) How to reach the author
+9) How to be informed about Batch Adventure updates and other
+    Pluk Productions products
+
+
+
+1) --------- About Batch Adventure ----------------
+
+1.1) --------- General information ----------------
+
+BatAdv is an adventure game, completely written in batch.
+The author is a mad maniac, who is not understood by the world. 
+His schoolmates were making fun of him because he spent a few weeks 
+programming a text adventure in batch (MWUAHAHA).
+He quit school, got broke and landed in the gutter. 
+A few friends told him to hold his chin up, and so he continued this 
+programme. 
+
+This story is about a guy who finds himself in a big mansion on an island.
+The rest of the story is not written yet (because I figured I could never
+ turn this into a working programme).
+It's probably not half way finished right now, but you can ofcourse 
+use the base program you are holding to create your own world.
+
+
+1.2) --------- System Requirements -------------------
+
+To play Batch Adventure you need: 
+- A PC with MS-DOS 3.x or higher operating system.
+- A Hard disk or floppy disk drive.
+- The disk from which this game is played must not be write-protected.
+  You must also pay attention that the files' read-only attribute is not 
+  set. This will cause problems when picking up objects.
+  When copied from CD-ROM, files are read-only.
+Advised configuration:
+- This game is a BATCH program. Batch programmes are read from disk line
+  by line. This means there's a LOT of disk activity and little CPU
+  activity. Therefore you'd rather play this game on 386 with a fast hard 
+  disk than on a Pentium II 400 from the floppy disk drive.
+- ANSI.SYS loaded. The game uses Ansi for colors in the game and for using
+  the Enter key to confirm input. The game will work without ansi, but
+  you will see weird codes on the screen when looking at an object and you
+  will have to use the dot (.) key to confirm input.
+- The faster your disk (drive), the better. 
+
+NOTE: This game is tested on MS-DOS 6.2 and MS-DOS 7 (Win 95 DOS prompt)
+      I see no reason why this game won't run on MS-DOS 3.0+, but since 
+      I'm not perfect, I may be mistaken. 
+
+
+1.3) -- Copyright Notice (and other stuff you don't want to read) ----
+
+- This game may be distributed freely. 
+If you like this game and you are willing to pay a small (or big) amount of
+money for it, please feel free to transfer it to my ABN-AMRO acount number
+40 65 77 489. 
+- You may design a complete new game with the existing engine. Please keep
+the engine (main.bat, addit.bat, b.bat) and this document intact and don't 
+remove the programmer's name from the main screen. 
+- Please consider this game as a huge batch tutorial. If you can use parts
+of it in your own programs, go ahead. 
+If you like me to explain parts of the program, or you need help creating 
+your own program, please contact me by e-mail.
+Remember: You can find pretty much info in your DOS tutorial or 
+MS-DOS help.exe. 
+
+
+2) ----------- Batch Adventure Key Controls ----------
+
+You can choose one of these commands from the command menu
+[g]et, [p]ut, [l]ook, [t]alk, [o]pen, [c]lose, [m]enu
+Direction keys: [w]est, [e]ast... [i]n
+Use Get and Put to pick up and drop objects. Giving an object to someone
+also happens with Put.
+Use Look to look at objects, rooms or persons.
+Use Talk to talk to a person.
+Use Open and Close to open and close objects or doors.
+Use Menu to go to the main menu
+Use the direction keys to go to an adjacent location.
+
+After the get/put/look/talk/open commands you are asked to type the
+name of the object. After you've typed the name, you can press '.' or
+-if you are in ansi mode- Enter. If you make a typing error you can use
+backspace to remove the word you have typed and start over again.
+With Esc you can cancel the input.
+ 
+In the main menu you can choose to save or load a game, quit or
+continue the game, or enter this help screen.
+
+
+3) ------------- Setting Up Batch Adventure ------------
+
+The game setup in BatAdv is done by setting environment variables in the 
+CONFIG.BAT file. example:
+set basedir=C:\BATADV
+set ansi=on
+set curroom=Corr1
+basedir holds the directory in which BatAdv is installed. (In this case
+C:\BATADV)
+ansi can be ON or OFF. Setting ansi to ON makes the game use colors and
+special keys like Enter. Make sure you have your ANSI.SYS loaded by placing 
+the line DEVICE=C:\DOS\ANSI.SYS in your CONFIG.SYS file.
+NOTICE that most objects have Ansi codes in their description. These codes
+are also displayed when ANSI.SYS is not loaded. The text will be messy if you
+try to display the description of these objects when ANSI.SYS is not loaded. 
+The 'set ansi=off' option is only useful if you want to test the game and
+for some reason you cannot load ANSI.SYS.
+The curroom variable holds the room in whitch the game is started.
+THIS SHOULD NORMALLY NOT BE CHANGED BY THE USER.
+If you are making your own game with this engine, you should enter your
+own starting room in the curroom variable.
+
+
+4) ---------------- Batch Adventure Future Ideas ----------
+
+Talk is implemented now, but the game needs persons to talk to.
+For the moment only one game can be saved and loaded. It would be a lot
+nicer if multiple games could be saved.
+Saving doesn't work THAT properly though.
+The story for now is NOT interesting. I need ideas for a story, and these
+ideas need to be implemented. This takes time. 
+I'm working on an idea that saves about a quarter of the amount of files. 
+
+
+5) ------------------- Trouble Shooting --------------------
+
+Things that can go wrong:
+1) - When you start the game you see a message like
+"Insufficient space in environment" 
+This means that there's not enough space to assign environment
+variables. Start the game with B.BAT instead of MAIN.BAT.
+B.BAT starts a new instance of COMMAND.COM with more environment space
+2) - "An error occurred! Errormessage"
+This means an error occurred during initialisation. 
+probably due to a missing file. Check if basedir is set correctly 
+in CONFIG.DAT.
+3) - "File not found."
+This means that a game file is missing. Probably an Init.bat or a 
+Roomdesc.Bat in the room you want to enter.
+4) - You start the game and see funny looking arrows followed by a '[' and
+a few letter codes.
+This means Ansi is set to ON in CONFIG.BAT, but ANSI.SYS is not loaded, or
+your PC does not support Ansi. Load the ANSI.SYS file, or set Ansi to Off in
+the CONFIG.BAT file.
+
+
+
+-- Advanced Information ----------
+
+
+6) --------- How is Batch Adventure built up? -----------
+
+Like many programs BatAdv is built up something like this:
+
+--- Start up
+--- Initialisation
++--- Main loop:
+|  input 
+|  processing
+|  output to screen
++---
+--- Exit
+
+In BatAdv this is done this way:
+
+-  Start up: The game is started with B.BAT.
+B.BAT starts a new instance of COMMAND.COM with an environment space big 
+enough to hold all environment variables used in the game. 
+In this new environment the program MAIN.BAT is started - The Main Program -
+
+-  Initialisation: CONFIG.BAT and ANSI.BAT
+CONFIG.BAT and ANSI.BAT are called by the Main Program
+In CONFIG.BAT a few configurations are done. These are
+set basedir=path  sets the directory in which BatAdv is installed
+set ansi=on/off   sets wether or not ansi must be used in the game
+      (Attention: ANSI.SYS must be loaded if you want to use ansi)
+
+In MAIN.BAT the curroom var is set. This indicates in which room the
+player starts. The reason that this setting is done in MAIN.BAT and not
+in CONFIG.BAT is that this setting should not be changed by the player, 
+but only by the game creator.
+
+ANSI.BAT is used when ansi=on is set in CONFIG.BAT
+It sets environment variables that indicate Ansi Escape sequensies (AES).
+The AES that are set are colors and and other control values.
+The color AES' are built up of 2 letters.
+the first can be either an 'F' or a 'B' which indicates Foreground or 
+Background color. The second is the first letter of the color:
+(BL)ack, (B)lue, (G)reen, (C)yan, (M)agenta, (Y)ellow and (W)hite
+The control values are RS, BOLD, BLINK and REVERSE.
+RS disables the other control variables and sets the color to white on black.
+BOLD in combination with a color displays the bright version of the color.
+(Bright Yellow is yellow, normal yellow is brown.. weird)
+BLINK makes the text blink, REVERSE reverses the foreground and the 
+background color.
+
+-  Main Loop
+In the main loop, the data is gathered to put on the screen.
+This data contains the results of the last command, the items in the 
+current room, the items in player's inventory, the exits and the 
+roomdescription of the current room.
+Then, the program waits for the user to press a key.
+The player can now choose one of the following commands:
+get, put, look, talk, open, close, menu
+north, east, south, west, up, down, in
+When the player choses get or put the programs checks if it can find the 
+program get.bat or put.bat. If not, the default get or put routine is
+executed. This is usually the case.
+It's best to check the comments in the MAIN.BAT program to see how each 
+function works.
+
+-  Exit
+On the program exit the used variables are reset and (if ansi is on) 
+the Enter key is reset to return an Ascii 13. (Do NOT terminate the 
+program by Ctrl-Break when ansi=on. Doing this will cause your Enter key
+to return a '.'. If, for some reason, the program is terminated the 
+'wrong way' and your Enter is flipping, you're in trouble. If you're in 
+Win 95 Dos prompt, you can switch to Windows and close it. If you're in 
+DOS mode or an earlier version of DOS, you'll have to reset your computer 
+since you can't start any programs anymore.
+
+
+7) -------- How to make your own game? --------------
+
+7.1) ------ The start -------------------------------
+
+It is very easy to make changes in the current game like adding locations 
+or items or even persons (this is somewhat harder, though).
+Just look at a location (Like corr1, which is the main hall of the mansion)
+check what files are in this room, how these files are built up and try to
+change some things.
+Two files are needed in a room: ROOMDESC.BAT and INIT.BAT
+ROOMDESC.BAT contains the description of the location. 
+INIT.BAT contains the initialisation of a location. In this file is set
+which way the exits are, and in which location you arrive when you go there.
+You can also use this file for conditional entrance. See the example 
+of moving from ENTRANCE to GARDEN1. The INIT.BAT file checks if the player
+has got a key in his/her inventory. If not, the player is sent back to
+the entrance.
+
+
+7.2) -------- Hints for making your own game ------------
+
+- Design a map and devide it into locations, draw the connections between
+  these locations.
+- It might be a good idea to put all the roomdesc.bat files together in one 
+  file. You can use the name of the location as the label to jump to.
+  This method saves files and thus room since a file of about 300 bytes 
+  uses a whole cluster varying from 4kb to 32kb! That is 100 times as much
+  space. If you use a program like doublespace or so, this might not be 
+  useful.
+Note: The reason I've not implemented the last hints is that it's a LOT 
+  of work, and I first want to finish the game.
+  (I may write a conversion program to do this. If it's done, you'll see it
+  on the  internet.)
+
+
+8) --------- How to reach the author -----------------
+
+You can write to:
+Jos Visser
+Groen van Prinstererstraat 77
+2953 BD Alblasserdam
+The Netherlands
+
+(Preferably not) phone to:
+NL +31 078-6915997  
+
+e-mail to:
+rjpaap@globalxs.nl
+
+visit my homepage at:
+DARN.i-got.no.homepage.com
+
+
+9) --- How to be informed about Batch Adventure updates and other
+    Pluk Productions products ----------
+
+As soon as I get a homepage, I will put my updates there.
+Send me an e-mail and ask me. I will remember your adress, and tell you 
+when I make either a homepage or an update to BatAdv.
+

@@ -1,0 +1,9 @@
+set north=
+set south=
+set east=
+set west=City19
+set up=
+set down=
+set in=
+set close=
+set look=

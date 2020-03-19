@@ -1,0 +1,707 @@
+UTILITIES                                     MICHAEL MEFFORD            
+Vol 9 No. 2                      
+BATCHMAN
+
+This issue's utility, BATCHMAN, is designed both to give your batch files 
+significantly more power and to add many of the refinements we all wish DOS
+provided.  You can check the DOS version, available memory, or display type 
+and then branch accordingly.  You can create colorful menus that branch on a 
+user keypress.  And, among its many other capabilities, BATCHMAN will let you 
+adjust the keyboard typematic rate and tame the grating DOS beep or turn it 
+into a tune.
+
+BATCHMAN is actually a collection of 48 batch file enhancement utilities, all
+rolled into one 6K program.  This provides more than convenience:  if 
+BATCHMAN's utilities were stored separately, at a minimum one cluster each, 
+they'd take up about 100K of disk space.  
+
+ERRORLEVELS
+
+The key to BATCHMAN's operations is the ERRORLEVEL code, a number that programs
+can report to DOS when they terminate and that can be acted upon from a batch 
+file.  I'll abbreviate ERRORLEVEL as EL for the remainder of this 
+documentation.  
+	
+An EL can have a value between 0 and 255.  Each of the BATCHMAN commands 
+returns information as an EL.  An explanation of the syntax of each of the 
+BATCHMAN commands and the ELs they return will be found below.  
+	
+The syntax for BATCHMAN is:
+
+    BATCHMAN [command] [arguments] [/R]
+
+Entering BATCHMAN without any parameters (or with an invalid parameter) will 
+bring up a multi-screen display that lists all the BATCHMAN commands.  The 
+optional arguments are parameters for any given command.  If you add the 
+optional /R switch, BATCHMAN will display the EL returned from the command.  
+The Report option will be most helpful when you are designing and debugging 
+your batch files.  Be sure to place BATCHMAN in a directory included on the DOS
+PATH so your batch files can find it.
+
+THE BATCHMAN COMMANDS
+
+I will be using the following conventions throughout the article:  the commands
+will be listed first, followed by any parameters they might accept, followed by
+the EL the command will return.  I'll put the EL in curley brackets so no one 
+will think it's part of the command syntax and try to type it in. For example:
+
+   CLS [nn]  {EL=0}
+
+If it is entered without the optional nn color argument, the command:
+ 
+   BATCHMAN CLS
+
+will clear the screen with whatever color it finds at the current cursor 
+position.  This provides the most flexibility when you plan to distribute a 
+BATCHMAN batch file to other systems because it retains the user's custom 
+color scheme.  
+
+If you wish to control the CLS color, just add the color argument nn, where 
+nn is a decimal or hexadecimal value derived from the table in Figure 1.  
+Hexadecimal numbers need a suffix of "h" to distinguish them from decimal.  
+Selecting a color in hex is easier than decimal because each of the 16 possible
+values for each of the background and foreground colors fits into a single 
+digit:  the first digit is background, the second foreground.
+	
+To clear the screen so that subsequent DOS output will use blue letters on a 
+light gray background, for example, you would enter:
+
+   BATCHMAN CLS 71h
+
+The first number (7) is the background color, and the second (1) is the 
+foreground color.  To do the same using a decimal number requires a little
+math: the background color is multiplied by 16 and added to the foreground. 
+In the above example, the decimal equivalent would be (7 * 16) + 7 = 113, 
+so the equivalent command in decimal would be:
+
+   BATCHMAN CLS 113
+
+Like its DOS counterpart, BATCHMAN's CLS also homes the cursor to the top left
+corner.  Unlike the DOS CLS, however, BATCHMAN's will clear the whole screen
+properly in video modes such as the EGA/VGA 43/50 line modes.
+
+   CECHO [C] [nn,]string   {EL=0}
+
+CECHO is similar to the DOS ECHO command except you can choose the color of the
+echoed string.  The nn color value is entered in the same manner as with CLS, 
+and again, if you don't enter a color value, BATCHMAN will use the currently 
+specified color.  To echo a "Zowie!" to the display in an eye-catching blinking
+yellow on red, you would enter:
+
+   BATCHMAN CECHO CEh,Zowie!
+
+The C (hex) value for the background color normally displays as orange for a 
+foreground color.  When used as a background color, however, it displays as the
+blinking low intensity counterpart, red.  Keep in mind that any high intensity 
+color selected for the background will blink in its corresponding low intensity
+color value.
+
+The optional C parameter shown in CECHO syntax (don't confuse it with the hex 
+C color value in the immediately-preceding example) stands for "no carriage 
+returns."  Normally, both CECHO and the DOS ECHO move to the next line after 
+echoing a string.  At times this is not desirable.  For example, you might 
+wish to echo two strings, with different colors, on the same line.  With 
+BATCHMAN you can suppress the carriage return by adding a solitary C as the 
+first argument.  For example, to display a red on yellow blinking "Zowie!" 
+followed by a normal red on yellow "Batchman!" on the same line your batch file
+would consist of:
+
+   ECHO OFF
+   BATCHMAN CECHO C CEh,Zowie!
+   BATCHMAN CECHO 4Eh,Batchman!
+
+You can suppress the carriage return to prevent the display from scrolling when
+you echo to the last line of the display.  This feature makes full screen menus
+feasible, whereas echoing to the last line with the DOS ECHO command causes the
+screen to scroll, spoiling any previous display layout.  
+
+   SETLOOP  [n]  {EL=0}
+   .
+   .
+   DECLOOP  {EL=SETLOOP-1}
+
+You use the SETLOOP and DECLOOP commands when you want to repeat a set of batch
+file commands.  SETLOOP sets a loop counter to the n argument, which can be a 
+decimal number between 0 and 255.  Once the counter is set, the BATCHMAN 
+DECLOOP command will decrement the counter each time it is executed and return 
+the new value of the loop counter as an EL.  The short batch file:
+
+   ECHO OFF
+   BATCHMAN SETLOOP 10
+   :HERE
+   BATCHMAN CECHO ZONK!
+   BATCHMAN DECLOOP
+   IF ERRORLEVEL 1 GOTO HERE
+
+will echo "ZONK!" to the display 10 times before terminating.  The batch 
+processor will branch to the HERE label as long as EL is 1 or greater.
+	
+Programmers may wonder where the loop counter is stored while other commands 
+are executing.  For the SETLOOP and PUSHPATH commands (PUSHPATH/POPPATH will be
+discussed below) BATCHMAN creates a small TSR of approximately 500 bytes.  The 
+loop counter uses one byte for its storage; the balance is reserved for path 
+strings.  When the loop counter becomes zero, the BATCHMAN TSR data area is 
+returned to the system memory pool (unless PUSHPATH is also using the data 
+area).  Note that since the loop counter is only one byte, you can not do loop 
+nesting.
+
+If you exit a batch file before SETLOOP has decremented to zero, the TSR data 
+area will not be released.  You should construct your batch files so that any 
+early exit from a loop will execute a SETLOOP 0 to force a recovery of the TSR 
+data area.  BATCHMAN is smart enough not only to find its previous TSR data, 
+but will prevent the creation of another if you try to enter two SETLOOP 
+commands.
+
+   QFORMAT [d:] [N]
+     {EL=0 if successful; EL=1 if not.}
+
+
+QFORMAT is designed to wipe out all the files and subdirectories on a floppy 
+disk at a single stroke.  To keep you from accidentally trashing your hard 
+disk, the command will only accept A: or B: as drive arguments.  All other 
+drive requests are ignored, and you can omit the drive argument only if A: or 
+B: is your current default drive.
+
+As a further precaution, QFORMAT warns you that all data will be lost and 
+requires that you press Y and Enter to confirm.  Any other keypress will abort 
+the process.  If you don't want BATCHMAN to pause and ask for your approval, 
+however, you can add the optional N argument to the command.  The N stands for 
+No Ask.  Use this option with caution! 
+
+QFORMAT will work only on diskettes that have already been formatted by DOS.  
+The DOS FORMAT command puts vital information about the media type, number of 
+clusters per FAT, and so forth, in the boot sector of the disk.  BATCHMAN's 
+QFORMAT command uses this information to find and place zeros in the FAT and 
+root directory sectors of the disk.
+
+The reason why QFORMAT can be so fast is that it doesn't have to do the same 
+work as the DOS FORMAT command.  FORMAT not only does a low level format, but 
+also writes over the entire data area of the disk.  It's the low-level-and-data
+format process that takes forever.  A low level format really needs be done 
+only once, and QFORMAT blithely skips that step.  QFORMAT is sophisticated 
+enough to preserve bad sector information, however.
+
+   PUSHPATH
+     {EL=0 if successful; EL=1 if not}
+   .
+   .
+   POPPATH
+     {EL=0 if successful; EL=1 if not}
+
+PUSHPATH saves the current drive and directory, which can then later be 
+restored with POPPATH.  Typically, a batch file that executes an application 
+includes a DOS CD command (often a change of drive as well) move operations to
+the place where the application resides.  After the application terminates, 
+it's usually desirable to return to the original path.  
+
+By way of example, to run Lotus 1-2-3 on drive D: and then return to the 
+default path afterwards, your batch file would look something like this:
+
+   BATCHMAN PUSHPATH
+   D:
+   CD \123
+   123
+   BATCHMAN POPPATH
+
+PUSHPATH saves the current path in a TSR data area, just as the SETLOOP 
+command does.  While only one byte is reserved for SETLOOP's loop counter, 
+however, BATCHMAN's TSR data area allows stacking up several paths with 
+PUSHPATH.  Subsequent POPPATH commands will retrieve the paths in a LIFO 
+(Last In First Out) stack basis.
+
+Suppose, for instance, that you're  currently in your directory and you issue 
+the following commands:
+
+   BATCHMAN PUSHPATH
+   CD \DOS 
+   BATCHMAN PUSHPATH
+   CD \PCMAG
+   BATCHMAN POPPATH
+   BATCHMAN POPPATH
+
+In this sequence, the first POPPATH puts you back into the \DOS subdirectory, 
+and the last POPPATH restores you to the root directory from which you started.
+
+The number of path layers that can be stored will vary with the length of each 
+path pushed onto the stack.  BATCHMAN's TSR area reserves 408 bytes for paths, 
+which allows for 6 levels of nested paths if each path is the maximum 65 
+characters allowed by DOS.  Shorter path names will allow nesting greater than 
+6 levels.  If necessary, you can change the storage size by modifying the 
+DIR_COUNT equate in the assembly listing.
+
+BATCHMAN returns an EL of 1 if it finds the stack too full for another 
+PUSHPATH or if the stack is already empty with a POPPATH.  Otherwise, the EL 
+returned is zero.  When the last path is popped off the stack, the TSR data 
+area is discarded and returned to the DOS memory pool.
+
+ANSI  {EL=0 if ANSI found;
+       EL=1 if not found}
+
+This BATCHMAN command is designed simply to determine whether ANSI.SYS is or 
+is not installed.  If the EL is 1 you can then branch around any ANSI.SYS 
+escape sequences contained in your batch files.  BATCHMAN is smart enough to 
+detect not only ANSI.SYS, but my own ANSI.COM alternative 
+(see our January 31, 1989, issue), but it will not find other ANSI.SYS 
+emulators, such as DesqView's DV-ANSI.
+
+BEEP [m,n[;m,n]...]   {EL=0}
+
+The BATCHMAN BEEP command gives you a great deal of flexibility in controlling 
+the frequency and length of the sound DOS emits in response to a Ctrl-G 
+character.  The m,n beep arguments are decimal numbers and are used in pairs,
+separated by a comma.  The m value represents the frequency (in Hz.), and n is 
+the number of 1/18th second increments that comprise the duration.
+	
+The frequencies of various musical notes can be found in the table in Figure 2.
+The command for a middle C beep of a 1/2 second, for example, would be:
+
+   BATCHMAN BEEP 262,9
+
+By separating the argument pairs with semicolons, you can produce a series of
+tones with the same BEEP command.  You might, for example, find it interesting 
+to try:
+
+   BATCHMAN BEEP 392,3;523,3;659,3;
+   784,3;10,3;659,3;784,12
+   
+The lowest valid frequency is 19, a very low buzzing sound.  You can use a 
+value less than 19 to create pauses between tones:  no sound will be emitted, 
+but the duration argument is executed, effectively producing a programmable 
+delay between notes.  
+
+If you omit all arguments, BEEP defaults to 1046,1--a C note for 1/18 of a 
+second.  The DOS Ctrl-G beep is a frequency of 886 that lasts for one second.  
+Musically, a frequency of 886 is an out-of-tune A, which probably explains why 
+it grates on so many ears.
+
+   WAITTIL hh:mm[ss]  
+     {EL=0 if successful; EL=1 if aborted}
+
+WAITTIL provides a convenient way to pause until a certain time of day.  The 
+hh:mm:[ss] argument is the time in hours, minutes, and optionally seconds.  
+BATCHMAN will wait until the specified time arrives, but you can manually 
+abort the wait by entering any keystroke.  A typical application for WAITTIL 
+would be to execute an electronic bulletin board communications program that 
+would automatically download messages late at night when rates are lower.
+
+   WAITFOR [mm:]ss  
+     {EL=0 if successful; EL=1 if aborted}
+
+WAITFOR simply pauses for a specified number of minutes (mm) and seconds (ss). 
+You can omit the minute part of the argument if you desire.  As with WAITTIL, 
+the  WAITFOR delay can be over-ridden by pressing a key.
+   
+   CURSORTYPE [m,n]
+
+You can use CURSORTYPE either to create a cursor size that suits your taste or 
+to restore the normal underline cursor after an application alters it. 
+Entering CURSORTYPE without any arguments will default to the standard 
+underline cursor.  To create a custom cursor, you supply the m,n arguments as 
+the start and stop line values.  These values can be either decimal or hex; 
+for hex input, add an "h" suffix to the number.
+
+The top of the character box is logical line zero; successively-numbered lines 
+increment downward.  The valid scan line values used for m and n are 0-7 for a 
+CGA, 0-13 for a monochrome or EGA, and 0-15 for a VGA.  The default underline 
+cursor start/stop lines are 6,7 for a CGA, 11,12 for a monochrome or EGA, and 
+13,14 for a VGA.  To set an EGA solid block cursor, for example, enter:
+
+   BATCHMAN CURSORTYPE 0,13
+
+Note that the EGA BIOS on some video boards will attempt to override your 
+selections.  BATCHMAN temporarily turns off this BIOS EGA emulation logic for 
+all video boards when the cursor type is set, and this seems to work for most 
+systems.  However, if entering CURSORTYPE without arguments does not give you 
+the normal default underline cursor, you can explicitly request an underline 
+cursor that fits your display.  You may need to do this for video modes other
+than the normal 25 line modes.  A "wrap around" cursor, in which the stop line 
+has a lesser value than the start line, is supported by the hardware of only 
+some video systems.
+
+   BREAK  {EL=0 if OFF; EL=1 if ON}
+
+The BATCHMAN BREAK command returns the current state of DOS's Ctrl-Break 
+checking.  You can change the state of BREAK with the DOS command of the same
+name.
+
+   DRIVEEXIST d:  
+     {EL=1 if exist; EL=0 if not}
+   DIREXIST directory
+     {EL=1 if exist; EL=0 if not}
+
+These two BATCHMAN commands are used to return an EL of 1 to your batch files 
+if the specified variable exists.
+
+   ISVOL [d:]volume
+     {EL=1 if exist; EL=0 if not}
+
+Similarly, this command returns an EL of 1 if a particular disk volume exists
+on the named drive.
+
+   YEAR    {EL=year from 1980 
+            (0-199), where 0=1980}
+   MONTH   {EL=(1-12)}
+   DAY     {EL=(1-31)}
+   WEEKDAY {EL=(0-6), where 
+            Sun=0; Sat=6}
+   HOUR    {EL=(0-23)}
+   MINUTE  {EL=(0-59)}
+   SECOND  {EL=(0-59)}
+
+This group of BATCHMAN commands returns the system time and date. Note that 
+you can obtain a relatively fine resolution of the time.
+
+   VIDEOMODE  {EL=(0-19)}
+
+The EL returned by the VIDEOMODE command allows you to determine which of the
+possible screen modes listed in Figure 3 is currently being used by your 
+display.
+
+   ROWS  {EL=display rows}
+   COLS  {EL=display columns}
+
+These obvious but very handy commands return the current number of rows or 
+columns displayed.
+
+   SETCURSOR m,n    {EL=0}
+
+By supplying values for m (the row) and n (the column) you can use SETCURSOR 
+to place your cursor at the specified screen location.  By using SETCURSOR in 
+concert with CECHO you can precisely control the location of your messages.  
+For example, to display "Gotham City" in blue in the middle of the screen, you
+would create the following batch file:
+
+   ECHO OFF
+   BATCHMAN SETCURSOR 12,35
+   BATCHMAN CECHO 1,Gotham City
+
+Be sure to include the ECHO OFF command, both so that DOS won't spoil your 
+display by echoing the commands, and so that the cursor won't return to the 
+beginning of the next line for the CECHO command.
+
+A related use of SETCURSOR is to hide the cursor.  You can do this by setting 
+the cursor to display on line 26, which is off screen.  Be sure to issue a 
+second SETCURSOR command that puts the cursor back on screen once the hidden 
+cursor is no longer needed, or you won't be able to see what you type!  If you 
+forget,  don't panic.  Just press Esc, blindly type CLS and press Enter, and 
+things will return to normal with the cursor homed to the top of the display.
+ 
+   E43V50  
+     {EL=0 if successful; EL=1 if not}
+
+This BATCHMAN command loads the 8x8 BIOS font for an EGA or VGA monitor.  This 
+changes the number of lines displayed to 43 (EGA) or 50 (VGA}.  You can use the
+DOS MODE command to return to the normal 25-line display.
+
+   PRTSC  {EL=0}
+
+This command will execute a printer screen dump exactly as if you had pressed 
+Shift-PrtSc on an 83-key keyboard or the dedicated Print Screen key on 101-key 
+keyboard.
+
+   COMPARE string1 string2
+     {EL=0 if match; EL=1 if no match}
+
+The BATCHMAN COMPARE makes a case insensitive comparison between two strings.  
+For most purposes you'll probably want to use COMPARE instead of the case 
+sensitive DOS batch command:
+
+   IF string1==string2
+
+With the DOS IF string comparison a non-case sensitive match requires two tests
+--one for uppercase and one for lowercase.  Even this does not guarantee a 
+match if the string is a mixture of upper and lower case, as might occur if a 
+batch file were looking for a person's name, for example.  COMPARE solves this 
+case problem.  Note that the BATCHMAN COMPARE does not need the double equal 
+signs the DOS IF command uses.
+
+   CANCOPY filespec [d:]
+     {EL=0 if room to copy; EL=1 if not}
+
+Before you copy a file or a number of files to another drive (especially a 
+floppy disk drive), you can use CANCOPY to see if there is enough room for all 
+the specified files.  The filespec you supply can use the DOS ? and * 
+wildcards.  If you don't specify the target drive, the default drive is 
+checked.  Thus, for example, to check whether the collection of PC Magazine 
+utilities you keep in a directory called PCMAG on drive C: will fit onto a 
+floppy, you would enter:
+ 
+   BATCHMAN CANCOPY C:\PCMAG\*.* A:
+
+BATCHMAN returns an EL of 0 if there is room; otherwise a 1 would be returned. 
+If you enter this from the DOS command line, you'll want to include the /R 
+option to see the EL returned on screen.
+
+   WARMBOOT
+   COLDBOOT
+
+As their names imply, WARMBOOT and COLDBOOT reboot your system.  WARMBOOT does 
+the same thing as pressing Ctrl-Alt-Del; COLDBOOT is like hitting the big red 
+switch.  A COLDBOOT does a memory check (among other things) that WARMBOOT 
+does not, and it takes a lot more time.  Of course, be forewarned that with 
+either of these commands all unsaved data in RAM memory will be lost.  
+Note that WARMBOOT and COLDBOOT may not work on some non-compatible systems.
+
+   SHIFT ALT | CTRL
+     {EL=1 if depressed; EL=0 if not}
+
+This command returns the state of either the Alt or Ctrl key.  For example,
+
+   BATCHMAN CTRL
+
+returns an EL of 1 if the Ctrl key is currently depressed.  You can use the 
+SHIFT command along with the BATCHMAN GETKEY command without arguments to 
+detect alternate key presses.  (See GETKEY, below, for an example.)
+
+   NUMLOCK [ON | OFF]  {EL=0}
+   CAPSLOCK [ON | OFF]  {EL=0}
+   SCROLLOCK [ON | OFF]  {EL=0}
+
+These three self-explanatory commands toggle the current shift state of the 
+NumLock, CapsLock or ScrollLock keys when used without the ON or OFF options.
+They explicitly turn the three keys on or off if the optional arguments are 
+supplied.  
+
+Thus, for example:
+
+   BATCHMAN NUMLOCK
+
+will toggle the NumLock state on if it was off or off if it was on.  Entering
+
+   BATCHMAN NUMLOCK OFF
+   
+will turn the NumLock state off regardless of whether it is currently on or 
+off.  This latter would be a useful line in your AUTOEXEC.BAT if you use the 
+numeric keypad for cursor navigation instead of number entry.  Note that on 
+some keyboards the LED indicator lights may not faithfully track changes in 
+shift status.
+
+   RENDIR old new {EL=0 if successful; EL=1 if not}
+
+Long-time users of our utilities will recognize this command, as it performs 
+the same function as the standalone RENDIR utility published in our April 15, 
+1986 issue.  The version presented here will rename a directory, but only on 
+systems using DOS 3.0 or later.  To use it simply enter the path of the old 
+directory and the new name.
+	
+For example, to change the name of a temporary directory named TMP on the C: 
+drive to a permanent name, say, ROBIN, you would enter:
+
+   BATCHMAN RENDIR C:\TMP C:\ROBIN
+
+Be sure to include the complete path for both the old and new directory names 
+if the directory is other than the default.
+
+   ROMDATE  {EL=0}
+
+ROMDATE displays the eight bytes of the BIOS date at address FFFF:0005 of the 
+ROM BIOS.  Usually, the display will be something like 10/07/87, but some 
+clone BIOSs do not have a date.  If no ASCII numbers are found, BATCHMAN 
+displays nothing.
+
+   GETKEY ['string' n]  {EL=scan code if no ['string' n] list; else
+     EL=position in list.}
+
+There are probably hundreds of versions of the batch file GETKEY program.  
+They return the scan code of the next key you press as an EL. If you enter the 
+BATCHMAN GETKEY command without the optional (bracketed) arguments, it will do
+the same thing.
+
+Entered without arguments, GETKEY can also be used with the BATCHMAN SHIFT 
+command to detect Alt- or Ctrl- key combinations.  The scan code for the "Q" 
+key is 16.  To check for an Alt-Q keypress (perhaps as a Quit key command), 
+you would use the following batch file:
+
+   ECHO OFF
+   :GETKEY
+   BATCHMAN GETKEY
+   IF NOT ERRORLEVEL 16 GOTO GETKEY
+   BATCHMAN SHIFT ALT
+   IF NOT ERRORLEVEL 1 GOTO GETKEY
+   ECHO Alt-Q was pressed.
+
+GETKEY's optional key list provides still another kind of functionality with 
+its optional key list.  The information you need may not be the scan code of a 
+given key, but rather its position in a string.  If you supply the optional 
+'string' argument to GETKEY, BATCHMAN will wait either until one of those keys 
+listed has been pressed or until you break out of the command with Ctrl-Break 
+or Ctrl-C.  An example may helpful here.  With the command:
+
+   BATCHMAN GETKEY 'yn'
+
+BATCHMAN will wait until either the "Y" or the "N" key or one of the break keys
+mentioned above is detected.   All other keypresses are ignored, and if the 
+break- out keys are pressed, the EL returned will be 255.  GETKEY is not case 
+sensitive, so if either "Y" or "y" is pressed, the EL will be 1, since the "y"
+is the first character in the string of valid keypresses.  For "N", an EL of 2 
+will return.
+
+The string must be enclosed in a pair either of single or double quotes.  If 
+you want the single quote included as a valid keypress, enclose it in double 
+quotes and vice versa for double quotes, as in the following example:
+
+   BATCHMAN GETKEY '"'
+
+You can also include the function keys (even the F11 and F12 keys of the 
+extended keyboard) in the GETKEY list.  The function key numbers are listed 
+without quotes, (they are designated by the n in the command syntax above), and 
+may or may not be further identified with a leading "F."  Multiple function 
+keys are delimited by either a space, comma or semicolon.  To add the F1 and F2
+as valid keys to the "yn" string example above, you would enter either:
+
+   BATCHMAN GETKEY "yn" F1 F2
+
+or just
+
+   BATCHMAN GETKEY "yn" 1 2
+
+If F1 is now pressed, the returned EL will be 3, since F1 is the third entry 
+in the list.
+
+   DOSVER {EL=(major*32)+minor}
+
+DOSVER returns an EL representation of the DOS version in use.  DOS version 
+numbers have two parts, the Major version (the number to the left of the 
+decimal point) and the Minor version (the number to the right).  For DOS 
+version 3.10, then, 3 is the major and the 10 is the minor.  Since the largest 
+EL number is 255, the DOS version number does not fit conveniently into an EL. 
+For DOS 3.10, for example, if the dot is discarded the remaining 310 is too 
+large for an EL.  
+
+Of course, BATCHMAN could be content to return only the major number, 
+truncating anything after the dot, or even the first digit after the dot.  But 
+that would be less than sufficient for some applications.  So instead, the 
+DOSVER command compresses the version number by multiplying the major number by
+32 and adding it to the minor number.  With DOS 3.30 the result will be (3*32)+
+30=126; with DOS 4.00 it would be 128.  If there had been a DOS version 3.32 
+we would have a problem of course, since this would also return 128.  
+Historically speaking however, we are safe here.
+
+   MAINMEM n | R  {EL=0 if enough} 
+   EXPMEM  n | R  {EL=0 if enough} EXTMEM  n | R {EL=0 if enough}
+
+The arguments for these three memory commands can be either a decimal number, 
+n, or an R.  The decimal argument is used to check whether the desired amount 
+of memory (in KB) is free.  If BATCHMAN finds that there is enough free memory
+to meet the request, the EL will be 0.  Thus, if an application needs 512K 
+bytes of the 640K maximum possible with DOS, you would enter:
+
+   BATCHMAN MAINMEM 512
+
+The EL will return 0 if there are at least 512K bytes free; otherwise, a 1.  
+Your batch file can then branch to an error message if there is not enough 
+memory to run the application.  Note that these memory commands do not 
+allocate the memory.  They only check if it is free.
+
+The alternative R argument stands for Report and will display the current free 
+memory of the type requested on the screen.  To see how much free expanded 
+memory you have, for example, enter:
+
+   BATCHMAN EXPMEM R
+
+The report option of the three types of memory will go nicely with BATCHMAN's 
+ROMDATE command in a system information batch file.
+
+   DISPLAY  {EL=display type}
+
+The DISPLAY command will report on the type of display your system has 
+installed.  The values returned by DISPLAY as EL codes are:
+ 
+   1=MDA         
+   2=CGA         
+   4=EGA color  
+   5=EGA mono   
+   6=PGS
+   7=VGA mono
+   8=VGA color
+  11=MCGA mono
+  12=MCGA color
+
+CPUÿ20 {EL=CPU type}
+
+Similarly, the CPU command returns an EL that indicates the microprocessor 
+used by your machine.  The specific EL numbers are:  1=8086/8088; 2=80186; 
+3=80286; and 4=80386.
+
+  WINDOW m,n,w,h[,c,b]  {EL=0 if
+  successful; EL=1 if not}
+
+The powerful WINDOW command displays screen boxes.  It provides several 
+parameters and options.  The first two decimal numbers (m,n) are the row and 
+column of the top left hand corner of the window.  The next two decimal 
+numbers (w,h) are the desired width and height of the window (including the 
+border characters.)
+
+The smallest size that WINDOW allows is 2 characters in width and height.  
+The optional fifth parameter, c, can be either a hexadecimal or decimal number 
+for the color of the window.  If no color argument is supplied, the current 
+color of the screen is used by default.  The last parameter, b, sets the type 
+of border used to surround the window.  If no parameter is found, spaces are 
+used.  If you enter a minus sign for b, a single-line box character will be 
+drawn.  An equals sign for b will produce a the double-line box character.  
+In all cases, the center of the window is cleared with spaces of the chosen 
+color.  For example, the command
+
+   BATCHMAN WINDOW 1,1,80,25,17h,=
+
+will create a blue window with white double line box characters that will fill
+the entire screen, making a nice menu frame.  Text could then be added with 
+the BATCHMAN SETCURSOR and CECHO commands.
+
+  TYPEMATIC [m,n | N] {EL=0 if
+  valid parameters; EL=1 if not}
+
+   m=typematic rate (0 - 31);
+   larger m=faster rate
+
+   n=initial delay  (0 - 3);
+   larger n=longer delay
+  
+   N=normal: m=20; n=1
+  
+   default: m=25; n=0
+
+TYPEMATIC works only with keyboards that support adjustable typematic 
+(automatic key repeating) rates at the BIOS level.  That includes most 
+machines, starting with the AT, but not for all clones.
+	
+The first optional decimal parameter, m, is a number between 0 and 31 and 
+represents the desired typematic rate.  The larger the m value, the faster 
+your keyboard will repeat keystrokes.  The second parameter, n, has a range of 
+0-3, and sets the initial delay.  This delay is the length of time you must 
+hold down a key before it begins repeating.  The larger the delay value the 
+longer the delay.  The delay parameters are in increments of 1/4 second, with 
+0=1/4 and 3=1 second.  The typematic parameters are divisors and cannot be 
+easily be translated into fractions of a second, however, and so should be 
+thought of only as a gradient scale.
+
+If you don't enter any parameters, TYPEMATIC defaults to what I consider ideal,
+a repeat rate of 25 and a delay of 0.  The 25 translates into about 17 
+characters per second with an initial delay of 1/4 second.  You can restore 
+the typematic 2rate to the normal hardware defaults (11 characters per second 
+with a 1/2 second delay) by using the N parameter.  Just enter:
+
+   BATCHMAN TYPEMATIC N
+
+and the normal values of 20, 1 will be used.  Once you try adding a little 
+zoom to your keyboard, however, I don't think you'll ever go back to the 
+hardware defaults.
+
+This is an updated version of Mike Mefford's BATCHMAN.  It has
+enhancements in the Getkey function and the Shift function.
+
+The Getkey function has been enhanced with respect to the
+command line arguments.  In this version, unquoted numeric
+arguments represent scan codes instead of  function keys.  Any
+scan code is valid;  thus, one can now check for Home, PgDn, or
+Tab as well as function keys.  A drawback is that one must know
+the scan code for the desired key, including the twelve function
+keys.  However, the previous mode of operation is still
+supported if one precedes the function key with an "f"
+(case-independent).  The "f" is no longer optional.  Finally,
+function key 0 has been defined as the "Enter" key.
+
+The Shift function now reports whether either of the shift keys
+is depressed.  Use BATCHMAN SHIFT SHIFT.  BATCHMAN returns
+Errorlevel 1 if either shift key is down;  otherwise errorlevel 0.
+

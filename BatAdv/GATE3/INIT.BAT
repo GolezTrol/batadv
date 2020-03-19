@@ -1,0 +1,9 @@
+set north=City29
+set south=
+set east=Gate3b
+set west=City1
+set up=
+set down=
+set in=
+set close=
+set look=
